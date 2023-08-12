@@ -1,0 +1,150 @@
+#include <stdio.h>
+#include <stdlib.h>
+//hesap yapisi
+struct Bankahesabi{
+	char isim[50];
+	int hesapno;
+	float bakiye;
+	char sifre[20];
+};
+struct Bankahesabi hesapolustur();
+void kaydet(struct Bankahesabi hesap[], int numAccounts);
+void hesapgoruntule(struct Bankahesabi hesap[], int hesapno, int arananHesapNo);
+void parayatir(struct Bankahesabi *hesap, double miktar);
+void paracek(struct Bankahesabi *hesap, double miktar);
+
+
+//yeni hesap olusturma
+struct Bankahesabi hesapolustur() 
+{
+	struct Bankahesabi yeniHesap;
+	printf("Hesap numarasi: ");
+	scanf("%d",&yeniHesap.hesapno);
+	
+	printf("Isim: ");
+	scanf("%s",yeniHesap.isim);
+	
+	printf("Bakiye: ");
+	scanf("%lf",&yeniHesap.bakiye);
+	
+	printf("Sifre: ");
+	scanf("%s",yeniHesap.sifre);
+	printf("\nYeni hesabiniz\n %d numara ile %s adli kisi adina\n %lf bakiye ile\n %s sifreniz ile belirlenmistir.\n",yeniHesap.hesapno,yeniHesap.isim,yeniHesap.bakiye,yeniHesap.sifre);
+	kaydet(&yeniHesap,1);
+}
+
+void kaydet(struct Bankahesabi hesap[], int numAccounts) {
+    FILE *dosya = fopen("kullanicilar.txt", "w");
+    if (dosya == NULL) {
+        printf("Dosya acilamadi.\n");
+        return;
+    }
+int i;
+    for (i = 0; i <numAccounts; i++) {
+        fprintf(dosya, "%d %s %.2lf %s\n",
+                hesap[i].hesapno, hesap[i].isim, hesap[i].bakiye, hesap[i].sifre);
+    }
+
+    fclose(dosya);
+}
+
+//hesap bilbileri goruntuleme
+void hesapgoruntule(struct Bankahesabi hesap[], int hesapno, int arananHesapNo) {
+	printf("Goruntulemek istediginiz hesap numarasini girin: ");
+    scanf("%d", &arananHesapNo);
+    int i;
+    for (i = 0; i < hesapno; i++) {
+        if (hesap[i].hesapno == arananHesapNo) {
+            printf("Hesap No: %d\n", hesap[i].hesapno);
+            printf("Isim: %s\n", hesap[i].isim);
+            printf("Bakiye: %.2lf\n", hesap[i].bakiye);
+            return; // Hesap bulundu, fonksiyonu sonlandır
+        }
+    }
+    printf("Hesap bulunamadi.\n");
+}
+//para  yatirma
+void parayatir(struct Bankahesabi *hesap,double miktar)
+{
+	hesap->bakiye +=miktar;
+	printf("\n%.2lf Tl yatirildi.\n",miktar);
+	printf("Yeni bakiye: %.2lf\n", hesap->bakiye);
+
+}
+//para cekme fonksiyonu
+
+void paracek(struct Bankahesabi *hesap,double miktar)
+{
+	if(miktar > hesap->bakiye)
+	{
+		printf("\nYetersiz bakiye.Islem iptal edildi.\n");
+	}
+	else
+	{
+		hesap->bakiye -=miktar;
+		printf("\n%.2lf TL cekildi.\n",miktar);
+		printf("kalan bakiye: %.2lf\n",hesap->bakiye);
+	}
+}
+int main()
+{
+	struct Bankahesabi hesap;
+	struct Bankahesabi hesaplar[100]; // Dizi tanımı bu şekilde olmalı
+
+	int secim;
+	double miktar;
+	int numAccounts = 0;
+	int hesapno=0;
+	int arananHesapNo;
+
+	
+
+
+	printf("***Banka Hesap Yonetimi***\n");
+	//kullaniciden secim alma
+
+do{
+	printf("\n1- Yeni Hesap Olustur\n");
+    printf("2- Hesap Goruntule\n");
+    printf("3- Para Yatir\n");
+    printf("4- Para Cek\n");
+    printf("0- Cikis\n");
+    printf("Seciminizi yapin: ");
+
+    scanf("%d", &secim);
+    // Seçime göre islem yapma
+   switch (secim) {
+    case 1:
+        hesaplar[numAccounts] = hesapolustur();
+        numAccounts++;
+        break;
+    case 2:
+        printf("Goruntulemek istediginiz hesap numarasini girin: ");
+        scanf("%d", &arananHesapNo);
+        hesapgoruntule(hesaplar, numAccounts, arananHesapNo);
+        break;
+    case 3:
+        printf("Yatirilacak miktar: ");
+        scanf("%lf", &miktar);
+        parayatir(&hesaplar[0], miktar); // İlk hesaba para yatırma işlemi
+        break;
+    case 4:
+        printf("Cekilecek miktar: ");
+        scanf("%lf", &miktar);
+        paracek(&hesaplar[0], miktar); // İlk hesaptan para çekme işlemi
+        break;
+    case 0:
+        printf("Programdan cikiliyor...\n");
+        return 0;
+    default:
+        printf("Gecersiz secim. Tekrar deneyin.\n");
+        
+        	
+		}
+}while (secim != 0)
+
+
+	kaydet(hesaplar, numAccounts);
+
+    return 0;
+}
